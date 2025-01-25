@@ -1,0 +1,43 @@
+<!-- voice_search.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Search</title>
+</head>
+<body>
+  <h1>Voice Search on Website</h1>
+  <button id="recordButton">Press to Speak</button>
+  <p id="output">Your search query will appear here...</p>
+
+  <script>
+    const recordButton = document.getElementById("recordButton");
+    const output = document.getElementById("output");
+
+    recordButton.addEventListener("click", () => {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const query = event.results[0][0].transcript;
+        output.textContent = `You said: ${query}`;
+        
+        // Send the query to the backend
+        fetch('/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        })
+          .then(response => response.json())
+          .then(data => console.log(data));
+      };
+
+      recognition.onerror = (event) => {
+        output.textContent = `Error: ${event.error}`;
+      };
+    });
+  </script>
+</body>
+</html>
